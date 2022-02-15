@@ -1,0 +1,49 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noErrorTruncation": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "target": "es6",
+    "watch": false,
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+
+    "baseUrl": "src",
+    "paths": {
+      "tslib" : ["../node_modules/tslib/tslib.d.ts"],
+      "~api/*": ["api/*"],
+      "~app/*": ["app/*"],
+      "~config/*": ["config/*"],
+      "~Notifier/*": ["app/Notifier/*"],
+      "~selectors/*": ["selectors/*"],
+      "~select/*": ["shared/organisms/fields/Select/*"],
+      "~shared/*": ["shared/*"],
+      "~utils/*": ["utils/*"],
+
+      "~api": ["api/index"],
+      "~env": ["config/environment/index"],
+      "~models": ["app/models/index"],
+      "~selectors": ["selectors/index"],
+      "~select": ["shared/organisms/fields/Select/index"],
+      "~State": ["config/redux/State"],
+      "~utils": ["utils/index"]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "src/**/*.test.ts?(x)"
+  ]
+}

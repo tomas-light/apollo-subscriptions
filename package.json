@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "name": "apollo-subscriptions",
+  "version": "1.0.0",
+  "license": "MIT",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "start": "npm-run-all --parallel start:server start:client",
+    "start:server": "yarn workspace apollo-subscriptions-server run start",
+    "start:client": "yarn workspace apollo-subscriptions-client run start"
+  },
+  "devDependencies": {
+    "npm-run-all": "4.1.5",
+    "typescript": "4.4.3",
+    "prettier": "2.4.1"
+  }
+}
