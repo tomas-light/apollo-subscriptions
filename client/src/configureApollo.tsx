@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { v4 as uuid } from 'uuid';
 import {
   ApolloClient,
   InMemoryCache,
@@ -9,13 +10,13 @@ import {
 import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
 
-function configureApollo() {
+function configureApollo(baseUri: string = 'localhost:5000') {
   const httpLink = new HttpLink({
-    uri: 'http://localhost:5000/gql-api',
+    uri: `http://${baseUri}/gql-api`,
   });
 
   const webSocketLink = new WebSocketLink({
-    uri: 'ws://localhost:5000/gql-api',
+    uri: `ws://${baseUri}/gql-api`,
     options: {
       reconnect: true,
     }
@@ -55,7 +56,9 @@ function configureApollo() {
     </ApolloProvider>
   );
 
-  return Provider;
+  const key = uuid();
+
+  return [Provider, key];
 }
 
 export { configureApollo };
