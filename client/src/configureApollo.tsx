@@ -6,9 +6,12 @@ import {
   ApolloProvider,
   split,
   HttpLink,
-} from "@apollo/client";
+} from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
+
+const sessionId = uuid();
+console.log('sessionID', sessionId);
 
 function configureApollo(baseUri: string = 'localhost:5000') {
   const httpLink = new HttpLink({
@@ -19,35 +22,41 @@ function configureApollo(baseUri: string = 'localhost:5000') {
     uri: `ws://${baseUri}/gql-api`,
     options: {
       reconnect: true,
-    }
+      connectionParams: {
+        sessionId,
+      },
+    },
   });
 
-  const splitLink = split(
-    ({ query }) => {
-      const definition = getMainDefinition(query);
-      const isSubscription = definition.kind === 'OperationDefinition' &&
-        definition.operation === 'subscription';
-
-      return isSubscription;
-    },
-    webSocketLink,
-    // httpLink,
-    split(
-      ({ query }) => {
-        const definition = getMainDefinition(query);
-        const isSubscription = definition.kind === 'OperationDefinition' &&
-          definition.operation === 'subscription';
-
-        return isSubscription;
-      },
-      httpLink,
-      httpLink
-    ),
-  );
+  // const splitLink = split(
+  //   ({ query }) => {
+  //     const definition = getMainDefinition(query);
+  //     const isSubscription = definition.kind === 'OperationDefinition' &&
+  //       definition.operation === 'subscription';
+  //
+  //     return isSubscription;
+  //   },
+  //   webSocketLink,
+  //   split(
+  //     ({ query }) => {
+  //       const definition = getMainDefinition(query);
+  //
+  //       const isMutation = definition.kind === 'OperationDefinition' && definition.operation === 'mutation';
+  //       const subscriptionMutationNames = ['UpdateUser'];
+  //
+  //       const shouldRedirectToWebsockets = isMutation && subscriptionMutationNames.includes(definition.name.value);
+  //
+  //       return shouldRedirectToWebsockets;
+  //     },
+  //     webSocketLink,
+  //     httpLink
+  //   ),
+  // );
 
   const apolloClient = new ApolloClient({
-    link: splitLink,
-    cache: new InMemoryCache()
+    link: webSocketLink,
+    cache: new InMemoryCache(),
+    connectToDevTools: true,
   });
 
   const Provider: FC = ({ children }) => (

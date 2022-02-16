@@ -6,68 +6,65 @@ import { User, users } from './data/users';
 
 const subscriptionEvents = {
   onUserUpdated: 'USER_UPDATED',
-}
+};
 
 const pubSub = new PubSub();
 
-class ApolloController implements IResolvers {
-  [index: string]: any;
+const apolloResolvers: IResolvers = {
+  Query: {
+    users: () => users,
+    user: (parent, args: { id: number }, context, info) => {
+      return users.find(user => user.id === args.id);
+    }
+  },
 
-  get Query() {
-    return {
-      users: () => users,
-      user: (parent, args: { id: number }, context, info) => {
-        return users.find(user => user.id === args.id);
+  Mutation: {
+    updateUser: (_, { user }: { user: User }, context, info) => {
+      console.log('mutation', context.sessionId);
+
+      const storedUser = users.find(_user => _user.id === user.id);
+      if (!storedUser) {
+        return null;
       }
-    };
-  };
 
-  get Mutation() {
-    return {
-      updateUser: (_, { user }: { user: User }, __) => {
-        const storedUser = users.find(_user => _user.id === user.id);
-        if (!storedUser) {
-          return null;
-        }
+      storedUser.name = user.name;
 
-        storedUser.name = user.name;
+      pubSub.publish(subscriptionEvents.onUserUpdated, {
+        onUserUpdated: storedUser,
+      });
 
-        pubSub.publish(subscriptionEvents.onUserUpdated, {
-          onUserUpdated: storedUser,
-        });
+      return storedUser;
+    },
+  },
 
-        return storedUser;
-      },
-    };
-  }
+  Subscription: {
+    onUserUpdated: {
+      subscribe: withFilter(
+        (rootValue?: any, args?: any, context?: any, info?: any) => {
+          const storedUser = users.find(_user => _user.id === args.userId);
+          if (storedUser) {
+            setTimeout(() => {
+              pubSub.publish(subscriptionEvents.onUserUpdated, {
+                onUserUpdated: storedUser,
+              });
+            }, 100);
+          }
 
-  get Subscription() {
-    return {
-      onUserUpdated: {
-        subscribe: withFilter(
-          (rootValue?: any, args?: any, context?: any, info?: any) => {
-            const storedUser = users.find(_user => _user.id === args.userId);
-            if (storedUser) {
-              setTimeout(() => {
-                pubSub.publish(subscriptionEvents.onUserUpdated, {
-                  onUserUpdated: storedUser,
-                });
-              }, 100);
-            }
+          console.log('subscribed', context.sessionId);
 
-            return pubSub.asyncIterator([subscriptionEvents.onUserUpdated]);
-          },
-          (payload, variables) => {
-            const isClientSubscribedToTheUserUpdate = payload.onUserUpdated.id === variables.userId;
-            return isClientSubscribedToTheUserUpdate;
-          },
-        ),
-        resolve: (payload) => {
-          return payload.onUserUpdated;
+          return pubSub.asyncIterator([subscriptionEvents.onUserUpdated]);
         },
+        (payload, variables) => {
+          const isClientSubscribedToTheUserUpdate = payload.onUserUpdated.id === variables.userId;
+          return isClientSubscribedToTheUserUpdate;
+        },
+      ),
+      resolve: (payload, args, context, info) => {
+        console.log('resolve', context.sessionId);
+        return payload.onUserUpdated;
       },
-    };
+    },
   }
-}
+};
 
-export { ApolloController };
+export { apolloResolvers };
