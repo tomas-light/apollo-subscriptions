@@ -1,6 +1,6 @@
 import { IResolvers } from '@graphql-tools/utils';
 import { PubSub, withFilter } from 'graphql-subscriptions';
-import { User, users } from '../data/users';
+import { User, users } from './data/users';
 
 // Resolvers define the technique for fetching the types defined in the schema.
 
@@ -44,9 +44,19 @@ class ApolloController implements IResolvers {
   get Subscription() {
     return {
       onUserUpdated: {
-        // subscribe: (_, { userId }: { userId: number }) => pubSub.asyncIterator([subscriptionEvents.onUserUpdated]),
         subscribe: withFilter(
-          () => pubSub.asyncIterator([subscriptionEvents.onUserUpdated]),
+          (rootValue?: any, args?: any, context?: any, info?: any) => {
+            const storedUser = users.find(_user => _user.id === args.userId);
+            if (storedUser) {
+              setTimeout(() => {
+                pubSub.publish(subscriptionEvents.onUserUpdated, {
+                  onUserUpdated: storedUser,
+                });
+              }, 100);
+            }
+
+            return pubSub.asyncIterator([subscriptionEvents.onUserUpdated]);
+          },
           (payload, variables) => {
             const isClientSubscribedToTheUserUpdate = payload.onUserUpdated.id === variables.userId;
             return isClientSubscribedToTheUserUpdate;

@@ -1,18 +1,8 @@
-import moduleAlias from 'module-alias';
 import path from 'path';
-import express, { Router, RequestHandler } from 'express';
+import express, { RequestHandler } from 'express';
 import http from 'http';
 import { json, urlencoded } from 'body-parser';
-import { container } from 'cheap-di';
-import { MvcMiddleware } from 'mvc-middleware';
-
-moduleAlias.addAliases({
-  '@utils': path.join(__dirname, 'utils'),
-});
-
-import { configureApollo, configDependencies } from './config';
-
-configDependencies(container);
+import { configureApollo } from './config';
 
 const appDir = path.dirname(require.main?.filename || __dirname);
 const uiBundlePath = path.join(appDir, '..', '..', 'dist');
@@ -22,11 +12,10 @@ app.use(json({ limit: '50mb' }) as RequestHandler);
 app.use(urlencoded({ limit: '50mb', extended: true }) as RequestHandler);
 app.use(express.static(uiBundlePath));
 
-const controllersPath = path.join(__dirname, 'controllers');
-
-new MvcMiddleware(app as any, Router as any, container)
-  .registerControllers(controllersPath)
-  .run();
+app.get('/*', (request, response) => {
+  const pathToView = path.join(uiBundlePath, `index.html`);
+  response.sendFile(pathToView);
+});
 
 const httpServer = http.createServer(app);
 

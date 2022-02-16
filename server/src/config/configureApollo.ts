@@ -1,11 +1,10 @@
-import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import { Express } from 'express';
 import { Server } from 'http';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { execute, subscribe } from 'graphql';
-import { ApolloController } from '../controllers/ApolloController';
+import { ApolloController } from '../ApolloController';
 
 import { typeDefs } from './typeDefs';
 
@@ -18,7 +17,6 @@ async function configureApollo(app: Express, httpServer: Server) {
   const apolloServer = new ApolloServer({
     schema,
     plugins: [
-      // ApolloServerPluginDrainHttpServer({ httpServer }),
       {
         async serverWillStart() {
           return {
@@ -41,6 +39,9 @@ async function configureApollo(app: Express, httpServer: Server) {
     schema,
     execute,
     subscribe,
+    onConnect: (connectionParams, webSocket, context) => {
+      console.log();
+    }
   }, {
     server: httpServer,
     path: apolloServer.graphqlPath

@@ -1,5 +1,6 @@
 import { configureApollo } from './config';
-import { ApolloSubscribedUsers, ApolloUsers, RestUsers } from './users';
+import { ApolloSubscribedUsers, SimpleSubscribedUsers } from './ApolloSubscribedUsers';
+import { ApolloUsers } from './ApolloUsers';
 
 const ApolloProvider = configureApollo();
 
@@ -10,11 +11,13 @@ const App = () => {
 				app page
 			</p>
 
-			<RestUsers />
-
 			<ApolloProvider>
 				<ApolloUsers />
 
+				<SimpleSubscribedUsers />
+				<br/>
+				<br/>
+				<br/>
 				<ApolloSubscribedUsers />
 			</ApolloProvider>
 		</div>
